@@ -183,7 +183,6 @@ class MockBucket(object):
                  src_key_name, metadata=NOT_IMPL, src_version_id=NOT_IMPL,
                  storage_class=NOT_IMPL, preserve_acl=NOT_IMPL,
                  encrypt_key=NOT_IMPL, headers=NOT_IMPL, query_args=NOT_IMPL):
-        import copy
         src_key = self.connection.get_bucket(src_bucket_name).get_key(src_key_name)
         new_key = self.new_key(key_name=new_key_name)
         new_key.data = copy.copy(src_key.data)
