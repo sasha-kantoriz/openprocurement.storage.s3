@@ -40,20 +40,26 @@ class S3Storage:
         key.set_acl('private')
         return uuid
 
-    def upload(self, uuid, post_file):
+    def upload(self, post_file, uuid=None):
         filename = get_filename(post_file.filename)
         content_type = post_file.type
         in_file = post_file.file
         bucket = self.connection.get_bucket(self.bucket)
-        if uuid not in bucket:
+        if uuid is not None and uuid not in bucket:
             raise KeyNotFound(uuid)
-        key = bucket.get_key(uuid)
-        md5 = key.get_metadata('md5')
-        if key.compute_md5(in_file)[0] != md5:
-            raise MD5Invalid
+        if uuid is None:
+            uuid = uuid4().hex
+            key = bucket.new_key(uuid)
+        else:
+            key = bucket.get_key(uuid)
+            md5 = key.get_metadata('md5')
+            if key.compute_md5(in_file)[0] != md5:
+                raise MD5Invalid
         key.set_metadata('Content-Type', content_type)
         key.set_metadata("Content-Disposition", build_header(filename, filename_compat=quote(filename.encode('utf-8'))))
         key.set_contents_from_file(in_file)
+        key.set_acl('private')
+        return uuid
 
     def get(self, uuid):
         url = self.connection.generate_url(method='GET', bucket=self.bucket, key=uuid, expires_in=300)
