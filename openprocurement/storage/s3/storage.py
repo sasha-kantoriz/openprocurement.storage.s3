@@ -30,12 +30,11 @@ class S3Storage:
         self.connection = connection
         self.bucket = bucket
 
-    def register(self, filename, md5):
+    def register(self, md5):
         bucket = self.connection.get_bucket(self.bucket)
         uuid = uuid4().hex
         key = bucket.new_key(uuid)
         key.set_metadata('md5', md5)
-        key.set_metadata("Content-Disposition", build_header(filename, filename_compat=quote(filename.encode('utf-8'))))
         key.set_contents_from_string(md5)
         key.set_acl('private')
         return uuid
@@ -59,7 +58,7 @@ class S3Storage:
         key.set_metadata("Content-Disposition", build_header(filename, filename_compat=quote(filename.encode('utf-8'))))
         key.set_contents_from_file(in_file)
         key.set_acl('private')
-        return uuid
+        return uuid, key.etag[1:-1]
 
     def get(self, uuid):
         url = self.connection.generate_url(method='GET', bucket=self.bucket, key=uuid, expires_in=300)
