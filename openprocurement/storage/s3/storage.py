@@ -58,7 +58,7 @@ class S3Storage:
         key.set_metadata("Content-Disposition", build_header(filename, filename_compat=quote(filename.encode('utf-8'))))
         key.set_contents_from_file(in_file)
         key.set_acl('private')
-        return uuid, key.etag[1:-1]
+        return uuid, key.etag[1:-1], content_type, filename
 
     def get(self, uuid):
         url = self.connection.generate_url(method='GET', bucket=self.bucket, key=uuid, expires_in=300)
