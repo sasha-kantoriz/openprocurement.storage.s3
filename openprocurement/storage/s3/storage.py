@@ -1,10 +1,8 @@
 from email.header import decode_header
-from openprocurement.documentservice.interfaces import IStorage
 from openprocurement.documentservice.storage import StorageRedirect, MD5Invalid, KeyNotFound
 from rfc6266 import build_header
 from urllib import quote
 from uuid import uuid4
-from zope.interface import implementer
 
 
 def get_filename(filename):
@@ -21,7 +19,6 @@ def get_filename(filename):
         return header[0]
 
 
-@implementer(IStorage)
 class S3Storage:
     connection = None
     bucket = None

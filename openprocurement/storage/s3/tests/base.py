@@ -248,7 +248,7 @@ class BaseWebTest(unittest.TestCase):
     def setUp(self):
         self.app = webtest.TestApp(
             "config:tests.ini", relative_to=os.path.dirname(__file__))
-        self.app.authorization = ('Basic', ('token', ''))
+        self.app.authorization = ('Basic', ('broker', 'broker'))
         connection = MockConnection()
         connection.create_bucket(self.app.app.registry.storage.bucket)
         self.app.app.registry.storage.connection = connection
