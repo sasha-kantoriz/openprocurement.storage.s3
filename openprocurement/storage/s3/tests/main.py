@@ -2,6 +2,7 @@
 
 import unittest
 from hashlib import md5
+from uuid import uuid4
 from openprocurement.storage.s3.tests.base import BaseWebTest
 
 
@@ -78,6 +79,14 @@ class SimpleTest(BaseWebTest):
         ])
 
         response = self.app.post(url, upload_files=[('file', u'file.doc', 'content')], status=404)
+        self.assertEqual(response.status, '404 Not Found')
+        self.assertEqual(response.content_type, 'application/json')
+        self.assertEqual(response.json['status'], 'error')
+        self.assertEqual(response.json['errors'], [
+            {u'description': u'Not Found', u'location': u'url', u'name': u'doc_id'}
+        ])
+
+        response = self.app.post('/upload/' + uuid4().hex, upload_files=[('file', u'file.doc', 'content')], status=404)
         self.assertEqual(response.status, '404 Not Found')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['status'], 'error')
