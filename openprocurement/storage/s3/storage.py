@@ -1,22 +1,8 @@
 from email.header import decode_header
-from openprocurement.documentservice.storage import StorageRedirect, MD5Invalid, KeyNotFound
+from openprocurement.documentservice.storage import StorageRedirect, MD5Invalid, KeyNotFound, get_filename
 from rfc6266 import build_header
 from urllib import quote
 from uuid import uuid4
-
-
-def get_filename(filename):
-    try:
-        pairs = decode_header(filename)
-    except Exception:
-        pairs = None
-    if not pairs:
-        return filename
-    header = pairs[0]
-    if header[1]:
-        return header[0].decode(header[1])
-    else:
-        return header[0]
 
 
 class S3Storage:
@@ -32,7 +18,7 @@ class S3Storage:
         uuid = uuid4().hex
         key = bucket.new_key(uuid)
         key.set_metadata('md5', md5)
-        key.set_contents_from_string(md5)
+        key.set_contents_from_string('')
         key.set_acl('private')
         return uuid
 

@@ -153,6 +153,14 @@ class SimpleTest(BaseWebTest):
             {u'description': u'Key Id does not exist', u'name': u'KeyID', u'location': u'url'}
         ])
 
+        response = self.app.post('/upload', upload_files=[('file', u'file.txt', '')])
+        self.assertEqual(response.status, '200 OK')
+        self.assertEqual(response.content_type, 'application/json')
+        self.assertIn('http://localhost/get/', response.json['get_url'])
+
+        response = self.app.get(response.json['get_url'])
+        self.assertEqual(response.status, '302 Found')
+
     def test_file_get(self):
         md5hash = md5('content').hexdigest()
         response = self.app.post('/register', {'md5': md5hash, 'filename': 'file.txt'})
