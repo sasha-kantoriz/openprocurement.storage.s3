@@ -1,5 +1,5 @@
 from email.header import decode_header
-from openprocurement.documentservice.storage import StorageRedirect, MD5Invalid, KeyNotFound, get_filename
+from openprocurement.documentservice.storage import StorageRedirect, MD5Invalid, KeyNotFound, ContentUploaded, get_filename
 from rfc6266 import build_header
 from urllib import quote
 from uuid import uuid4, UUID
@@ -40,9 +40,11 @@ class S3Storage:
             if path not in bucket:
                 raise KeyNotFound(uuid)
             key = bucket.get_key(path)
+            if key.size != 0:
+                raise ContentUploaded(uuid)
             md5 = key.get_metadata('md5')
             if key.compute_md5(in_file)[0] != md5:
-                raise MD5Invalid
+                raise MD5Invalid(md5)
         key.set_metadata('Content-Type', content_type)
         key.set_metadata("Content-Disposition", build_header(filename, filename_compat=quote(filename.encode('utf-8'))))
         key.set_contents_from_file(in_file)
