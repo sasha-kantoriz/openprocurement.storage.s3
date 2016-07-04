@@ -35,7 +35,7 @@ class SimpleTest(BaseWebTest):
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['status'], 'error')
         self.assertEqual(response.json['errors'], [
-            {u'description': u'Not Found', u'location': u'body', u'name': u'md5'}
+            {u'description': u'Not Found', u'location': u'body', u'name': u'hash'}
         ])
 
         response = self.app.post(url, {'not_md5': 'hash'}, status=404)
@@ -43,11 +43,11 @@ class SimpleTest(BaseWebTest):
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['status'], 'error')
         self.assertEqual(response.json['errors'], [
-            {u'description': u'Not Found', u'location': u'body', u'name': u'md5'}
+            {u'description': u'Not Found', u'location': u'body', u'name': u'hash'}
         ])
 
     def test_register_post(self):
-        response = self.app.post('/register', {'md5': 'hash', 'filename': 'file.txt'})
+        response = self.app.post('/register', {'hash': 'hash', 'filename': 'file.txt'})
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         self.assertIn('http://localhost/upload/', response.json['upload_url'])
@@ -103,7 +103,7 @@ class SimpleTest(BaseWebTest):
         ])
 
     def test_upload_file_md5(self):
-        response = self.app.post('/register', {'md5': 'hash', 'filename': 'file.txt'})
+        response = self.app.post('/register', {'hash': 'hash', 'filename': 'file.txt'})
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         self.assertIn('http://localhost/upload/', response.json['upload_url'])
@@ -113,13 +113,13 @@ class SimpleTest(BaseWebTest):
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['status'], 'error')
         self.assertEqual(response.json['errors'], [
-            {u'description': u'Invalid MD5 checksum', u'name': u'file', u'location': u'body'}
+            {u'description': u'Invalid checksum', u'name': u'file', u'location': u'body'}
         ])
 
     def test_upload_file_post(self):
         content = 'content'
         md5hash = md5(content).hexdigest()
-        response = self.app.post('/register', {'md5': md5hash, 'filename': 'file.txt'})
+        response = self.app.post('/register', {'hash': md5hash, 'filename': 'file.txt'})
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         self.assertIn('http://localhost/upload/', response.json['upload_url'])
@@ -204,7 +204,7 @@ class SimpleTest(BaseWebTest):
 
     def test_file_get(self):
         md5hash = md5('content').hexdigest()
-        response = self.app.post('/register', {'md5': md5hash, 'filename': 'file.txt'})
+        response = self.app.post('/register', {'hash': md5hash, 'filename': 'file.txt'})
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         self.assertIn('http://localhost/upload/', response.json['upload_url'])
