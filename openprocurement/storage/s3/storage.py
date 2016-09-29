@@ -43,7 +43,6 @@ class S3Storage:
             if key.size != 0:
                 raise ContentUploaded(uuid)
             md5 = key.get_metadata('hash')
-            print md5[4:], key.compute_md5(in_file)[0]
             if key.compute_md5(in_file)[0] != md5[4:]:
                 raise HashInvalid(md5)
         key.set_metadata('Content-Type', content_type)
