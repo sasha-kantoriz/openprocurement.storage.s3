@@ -2,8 +2,11 @@
 
 import unittest
 from hashlib import md5
-from uuid import uuid4
+import uuid
+from openprocurement.storage.s3.storage import S3Storage
 from openprocurement.storage.s3.tests.base import BaseWebTest
+from openprocurement.storage.s3 import includeme
+from mock import MagicMock, patch
 
 
 class SimpleTest(BaseWebTest):
@@ -254,6 +257,33 @@ class SimpleTest(BaseWebTest):
         self.assertEqual(response.status, '302 Found')
         self.assertEqual(response.content_type, 'application/json')
         self.assertIn('http://s3/test/', response.json)
+
+    def test_includeme(self):
+        config = MagicMock()
+        config.registry.settings = {
+            's3.access_key': uuid.uuid4().hex,
+            's3.secret_key': uuid.uuid4().hex,
+            's3.bucket': 'test'
+        }
+        storage = getattr(config.registry, 'storage')
+        self.assertIsInstance(storage, MagicMock)
+
+        includeme(config)
+        storage = getattr(config.registry, 'storage')
+        self.assertIsInstance(storage, S3Storage)
+        self.assertEqual(storage.bucket, 'test')
+        self.assertEqual(storage.connection.host, 's3.amazonaws.com')
+        self.assertEqual(storage.connection.secret_key,
+                         config.registry.settings['s3.secret_key'])
+        self.assertEqual(storage.connection.access_key,
+                         config.registry.settings['s3.access_key'])
+
+        config.registry.settings['s3.host'] = 'localhost'
+        includeme(config)
+        storage = getattr(config.registry, 'storage')
+        self.assertIsInstance(storage, S3Storage)
+        self.assertEqual(storage.connection.host, 'localhost')
+
 
 def suite():
     suite = unittest.TestSuite()
